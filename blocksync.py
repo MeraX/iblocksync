@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 """
-blocksync.py
-
 Synchronise block devices over the network
 
-* Copyright 2006-2008 Justin Azoff <justin@bouncybouncy.net>
-* Copyright 2011 Robert Coup <robert@coup.net.nz>
-* License: GPL
+Copyright 2006-2008 Justin Azoff <justin@bouncybouncy.net>
+Copyright 2011 Robert Coup <robert@coup.net.nz>
+License: GPL
 
 Getting started:
- * Copy blocksync.py to the home directory hosts
- * Make sure your remote user can either sudo or is root itself.
- * Make sure your local user can ssh to the remote host
- * Invoke:
+
+* Copy blocksync.py to the home directory on the remote host
+* Make sure your remote user can either sudo or is root itself.
+* Make sure your local user can ssh to the remote host
+* Invoke:
     sudo python blocksync.py /dev/source user@remotehost /dev/dest
 """
 
@@ -131,12 +130,13 @@ def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024):
 
 if __name__ == "__main__":
     from optparse import OptionParser
-    parser = OptionParser(usage="%prog [options] /dev/source host [/dev/dest]")
+    parser = OptionParser(usage="%prog [options] /dev/source user@remotehost [/dev/dest]")
     parser.add_option("-b", "--blocksize", dest="blocksize", action="store", type="int", help="block size (bytes)", default=1024 * 1024)
     (options, args) = parser.parse_args()
 
     if len(args) < 2:
         parser.print_help()
+        print __doc__
         sys.exit(1)
 
     if args[0] == 'server':
