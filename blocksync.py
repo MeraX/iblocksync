@@ -47,7 +47,7 @@ def server(dev, blocksize):
     sys.stdout.flush()
 
     for block in getblocks(f, blocksize):
-        print format(adler32(block) & 0xFFFFFFFF, '08x')
+        print "%08x" % (adler32(block) & 0xFFFFFFFF)
         sys.stdout.flush()
         res = sys.stdin.readline()
         if res != SAME:
@@ -104,7 +104,7 @@ def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024):
     t0 = time.time()
     t_last = t0
     for i, l_block in enumerate(getblocks(f, blocksize)):
-        l_sum = format(adler32(l_block) & 0xFFFFFFFF, '08x')
+        l_sum = "%08x" % (adler32(l_block) & 0xFFFFFFFF)
         r_sum = p_out.readline().strip()
 
         if l_sum == r_sum:
