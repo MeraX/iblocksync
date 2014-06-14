@@ -16,6 +16,7 @@ Getting started:
     python blocksync.py /dev/source user@remotehost /dev/dest
 """
 
+import os
 import sys
 from zlib import adler32
 import subprocess
@@ -118,6 +119,7 @@ def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024, keyfile=None, paus
         print "Source device size (%d) is smaller than remote device size (%d), proceeding anyway" % (size, remote_size)
 
     same_blocks = diff_blocks = 0
+    interactive = os.isatty(sys.stdout.fileno())
 
     print "Starting sync..."
     t0 = time.time()
@@ -141,12 +143,21 @@ def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024, keyfile=None, paus
             diff_blocks += 1
 
         t1 = time.time()
+        rate = (i + 1.0) * blocksize / (1024.0 * 1024.0) / (t1 - t0)
+
+        if not interactive:
+            continue
+
         if t1 - t_last > 1 or (same_blocks + diff_blocks) >= size_blocks:
-            rate = (i + 1.0) * blocksize / (1024.0 * 1024.0) / (t1 - t0)
             print "\rsame: %d, diff: %d, %d/%d, %5.1f MB/s" % (same_blocks, diff_blocks, same_blocks + diff_blocks, size_blocks, rate),
             t_last = t1
 
-    print "\n\nCompleted in %d seconds" % (time.time() - t0)
+    if interactive:
+        print
+    else:
+        print "same: %d, diff: %d, %d/%d, %5.1f MB/s" % (same_blocks, diff_blocks, same_blocks + diff_blocks, size_blocks, rate)
+
+    print "\nCompleted in %d seconds" % (time.time() - t0)
 
     return same_blocks, diff_blocks
 
