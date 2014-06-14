@@ -150,7 +150,7 @@ def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024, keyfile=None, paus
 if __name__ == "__main__":
     from optparse import OptionParser
     parser = OptionParser(usage="%prog [options] /dev/source user@remotehost [/dev/dest]")
-    parser.add_option("-b", "--blocksize", dest="blocksize", action="store", type="int", help="block size (bytes)", default=1024 * 1024)
+    parser.add_option("-b", "--blocksize", dest="blocksize", type="int", help="block size (bytes, defaults to 1MB)", default=1024 * 1024)
     parser.add_option("-i", "--id", dest="keyfile", help="ssh public key file")
     parser.add_option("-p", "--pause", dest="pause", type="int", help="pause between processing blocks, reduces system load (ms, defaults to 0)")
     (options, args) = parser.parse_args()
