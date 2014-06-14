@@ -62,8 +62,13 @@ def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024):
         dstdev = srcdev
  
     print "Block size is %0.1f MB" % (float(blocksize) / (1024 * 1024))
+
     # cmd = ['ssh', '-c', 'blowfish', dsthost, 'sudo', 'python', 'blocksync.py', 'server', dstdev, '-b', str(blocksize)]
-    cmd = ['ssh', '-c', 'blowfish', dsthost, 'python', 'blocksync.py', 'server', dstdev, '-b', str(blocksize)]
+    cmd = []
+    if dsthost != 'localhost':
+        cmd += ['ssh', '-c', 'blowfish', dsthost]
+    cmd += ['python', 'blocksync.py', 'server', dstdev, '-b', str(blocksize)]
+
     print "Running: %s" % " ".join(cmd)
  
     p = subprocess.Popen(cmd, bufsize=0, stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
