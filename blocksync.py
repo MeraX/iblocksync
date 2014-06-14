@@ -57,12 +57,18 @@ def server(dev, blocksize):
             f.write(newblock)
 
 
-def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024, keyfile=None):
+def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024, keyfile=None, pause=0):
 
     if not dstdev:
         dstdev = srcdev
 
     print "Block size is %0.1f MB" % (float(blocksize) / (1024 * 1024))
+
+    pause_ms = 0
+    if pause:
+        # sleep() wants seconds...
+        pause_ms = float(pause) / 1000
+        print "Slowing down for %d ms/block (%0.4f sec/block)" % (pause, pause_ms)
 
     # cmd = ['ssh', '-c', 'blowfish', dsthost, 'sudo', 'python', 'blocksync.py', 'server', dstdev, '-b', str(blocksize)]
     cmd = []
@@ -117,6 +123,8 @@ def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024, keyfile=None):
     for i, l_block in enumerate(getblocks(f, blocksize)):
         l_sum = "%08x" % (adler32(l_block) & 0xFFFFFFFF)
         r_sum = p_out.readline().strip()
+        if pause_ms:
+            time.sleep(pause_ms)
 
         if l_sum == r_sum:
             p_in.write(SAME)
@@ -144,6 +152,7 @@ if __name__ == "__main__":
     parser = OptionParser(usage="%prog [options] /dev/source user@remotehost [/dev/dest]")
     parser.add_option("-b", "--blocksize", dest="blocksize", action="store", type="int", help="block size (bytes)", default=1024 * 1024)
     parser.add_option("-i", "--id", dest="keyfile", help="ssh public key file")
+    parser.add_option("-p", "--pause", dest="pause", type="int", help="pause between processing blocks, reduces system load (ms, defaults to 0)")
     (options, args) = parser.parse_args()
 
     if len(args) < 2:
@@ -161,4 +170,4 @@ if __name__ == "__main__":
             dstdev = args[2]
         else:
             dstdev = None
-        sync(srcdev, dsthost, dstdev, options.blocksize, options.keyfile)
+        sync(srcdev, dsthost, dstdev, options.blocksize, options.keyfile, options.pause)
