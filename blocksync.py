@@ -13,7 +13,7 @@ Getting started:
 * Make sure your remote user can either sudo or is root itself.
 * Make sure your local user can ssh to the remote host
 * Invoke:
-    sudo python blocksync.py /dev/source user@remotehost /dev/dest
+    python blocksync.py /dev/source user@remotehost /dev/dest
 """
 
 import sys
@@ -57,7 +57,7 @@ def server(dev, blocksize):
             f.write(newblock)
 
 
-def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024, keyfile=None, pause=0):
+def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024, keyfile=None, pause=0, sudo=False):
 
     if not dstdev:
         dstdev = srcdev
@@ -70,13 +70,14 @@ def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024, keyfile=None, paus
         pause_ms = float(pause) / 1000
         print "Slowing down for %d ms/block (%0.4f sec/block)" % (pause, pause_ms)
 
-    # cmd = ['ssh', '-c', 'blowfish', dsthost, 'sudo', 'python', 'blocksync.py', 'server', dstdev, '-b', str(blocksize)]
     cmd = []
     if dsthost != 'localhost':
         cmd += ['ssh', '-c', 'blowfish']
         if keyfile:
             cmd += ['-i', keyfile]
         cmd += [dsthost]
+    if sudo:
+        cmd += ['sudo']
     cmd += ['python', 'blocksync.py', 'server', dstdev, '-b', str(blocksize)]
 
     print "Running: %s" % " ".join(cmd)
@@ -110,9 +111,11 @@ def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024, keyfile=None, paus
         print "Error accessing device on remote host!"
         sys.exit(1)
     remote_size = int(line)
-    if size != remote_size:
-        print "Source device size (%d) doesn't match remote device size (%d)!" % (size, remote_size)
+    if size > remote_size:
+        print "Source device size (%d) doesn't fit into remote device size (%d)!" % (size, remote_size)
         sys.exit(1)
+    elif size < remote_size:
+        print "Source device size (%d) is smaller than remote device size (%d), proceeding anyway" % (size, remote_size)
 
     same_blocks = diff_blocks = 0
 
@@ -149,10 +152,11 @@ def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024, keyfile=None, paus
 
 if __name__ == "__main__":
     from optparse import OptionParser
-    parser = OptionParser(usage="%prog [options] /dev/source user@remotehost [/dev/dest]")
+    parser = OptionParser(usage="%prog [options] /dev/source [user@]remotehost [/dev/dest]")
     parser.add_option("-b", "--blocksize", dest="blocksize", type="int", help="block size (bytes, defaults to 1MB)", default=1024 * 1024)
     parser.add_option("-i", "--id", dest="keyfile", help="ssh public key file")
     parser.add_option("-p", "--pause", dest="pause", type="int", help="pause between processing blocks, reduces system load (ms, defaults to 0)")
+    parser.add_option("-s", "--sudo", dest="sudo", action="store_true", help="use sudo on the remote end (defaults to off)", default=False)
     (options, args) = parser.parse_args()
 
     if len(args) < 2:
@@ -170,4 +174,4 @@ if __name__ == "__main__":
             dstdev = args[2]
         else:
             dstdev = None
-        sync(srcdev, dsthost, dstdev, options.blocksize, options.keyfile, options.pause)
+        sync(srcdev, dsthost, dstdev, options.blocksize, options.keyfile, options.pause, options.sudo)
