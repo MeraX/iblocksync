@@ -4,6 +4,7 @@ Synchronise block devices over the network
 
 Copyright 2006-2008 Justin Azoff <justin@bouncybouncy.net>
 Copyright 2011 Robert Coup <robert@coup.net.nz>
+Copyright 2012 Holger Ernst <info@ernstdatenmedien.de>
 License: GPL
 
 Getting started:
@@ -56,7 +57,7 @@ def server(dev, blocksize):
             f.write(newblock)
 
 
-def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024):
+def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024, keyfile=None):
 
     if not dstdev:
         dstdev = srcdev
@@ -66,7 +67,10 @@ def sync(srcdev, dsthost, dstdev=None, blocksize=1024 * 1024):
     # cmd = ['ssh', '-c', 'blowfish', dsthost, 'sudo', 'python', 'blocksync.py', 'server', dstdev, '-b', str(blocksize)]
     cmd = []
     if dsthost != 'localhost':
-        cmd += ['ssh', '-c', 'blowfish', dsthost]
+        cmd += ['ssh', '-c', 'blowfish']
+        if keyfile:
+            cmd += ['-i', keyfile]
+        cmd += [dsthost]
     cmd += ['python', 'blocksync.py', 'server', dstdev, '-b', str(blocksize)]
 
     print "Running: %s" % " ".join(cmd)
@@ -139,6 +143,7 @@ if __name__ == "__main__":
     from optparse import OptionParser
     parser = OptionParser(usage="%prog [options] /dev/source user@remotehost [/dev/dest]")
     parser.add_option("-b", "--blocksize", dest="blocksize", action="store", type="int", help="block size (bytes)", default=1024 * 1024)
+    parser.add_option("-i", "--id", dest="keyfile", help="ssh public key file")
     (options, args) = parser.parse_args()
 
     if len(args) < 2:
@@ -156,5 +161,4 @@ if __name__ == "__main__":
             dstdev = args[2]
         else:
             dstdev = None
-        sync(srcdev, dsthost, dstdev, options.blocksize)
-
+        sync(srcdev, dsthost, dstdev, options.blocksize, options.keyfile)
