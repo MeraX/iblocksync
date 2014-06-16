@@ -5,15 +5,19 @@ Synchronise block devices over the network
 Copyright 2006-2008 Justin Azoff <justin@bouncybouncy.net>
 Copyright 2011 Robert Coup <robert@coup.net.nz>
 Copyright 2012 Holger Ernst <info@ernstdatenmedien.de>
+Copyright 2014 Robert McQueen <robert.mcqueen@collabora.co.uk>
 License: GPL
 
 Getting started:
 
-* Copy blocksync.py to the home directory on the remote host
-* Make sure your remote user can either sudo or is root itself.
-* Make sure your local user can ssh to the remote host
+* Copy blocksync.py to the home directory on the remote host & make it executable
+* Make sure your remote user is either root or can sudo (use -s for sudo)
+* Make sure your local user can ssh to the remote host (use -i for a SSH key)
 * Invoke:
-    python blocksync.py /dev/source user@remotehost /dev/dest
+    python blocksync.py /dev/source [user@]remotehost [/dev/dest]
+
+* Specify localhost for local usage:
+    python blocksync.py /dev/source localhost /dev/dest
 """
 
 import os
