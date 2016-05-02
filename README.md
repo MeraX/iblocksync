@@ -54,10 +54,12 @@ Restore incremental file image
 ## Licence
 
 Based on  blocksync.py <https://gist.github.com/ramcq/0dc76d494598eb09740f>
-Copyright blocksync.py 2006-2008 Justin Azoff <justin@bouncybouncy.net>
-Copyright blocksync.py 2011 Robert Coup <robert@coup.net.nz>
-Copyright blocksync.py 2012 Holger Ernst <info@ernstdatenmedien.de>
-Copyright blocksync.py 2014 Robert McQueen <robert.mcqueen@collabora.co.uk>
+
+* Copyright blocksync.py 2006-2008 Justin Azoff <justin@bouncybouncy.net>
+* Copyright blocksync.py 2011 Robert Coup <robert@coup.net.nz>
+* Copyright blocksync.py 2012 Holger Ernst <info@ernstdatenmedien.de>
+* Copyright blocksync.py 2014 Robert McQueen <robert.mcqueen@collabora.co.uk>
+
 Copyright iblocksync.py 2016 Marek Jacob
 
 This program is free software: you can redistribute it and/or modify
